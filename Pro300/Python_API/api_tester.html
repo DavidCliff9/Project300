@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask API Tester (cURL Alternative)</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom scrollbar styling for better presentation */
+        #dataDisplay {
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen p-4 sm:p-8 font-['Inter']">
+
+    <div class="max-w-4xl mx-auto">
+        <header class="text-center mb-10">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-blue-800 mb-2">
+                Flask API Interaction Tool
+            </h1>
+            <p class="text-gray-600">
+                Test your local <code class="bg-gray-200 p-1 rounded">/read</code> and <code class="bg-gray-200 p-1 rounded">/write</code> endpoints.
+                (Running locally on <code class="font-mono">http://localhost:5000</code>)
+            </p>
+        </header>
+
+        <!-- Status & Message Box -->
+        <div id="messageBox" class="p-3 mb-6 hidden rounded-lg shadow-md transition-opacity duration-300" role="alert">
+            <div id="statusText" class="font-semibold"></div>
+        </div>
+
+        <!-- API Write Section (POST) -->
+        <div class="bg-white p-6 rounded-xl shadow-lg mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4 border-b pb-2">1. Write Data (POST /write)</h2>
+            <div class="flex flex-col sm:flex-row gap-4 mb-4">
+                <input type="text" id="nameInput" placeholder="Item Name (e.g., Raspberry Pi)"
+                       class="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                <input type="text" id="descInput" placeholder="Description (e.g., Simple sensor reading)"
+                       class="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <button id="submitBtn" 
+                    class="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-150 ease-in-out transform hover:scale-[1.01]">
+                Submit Data (POST)
+            </button>
+        </div>
+
+        <!-- API Read Section (GET) -->
+        <div class="bg-white p-6 rounded-xl shadow-lg">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4 border-b pb-2">2. Read Data (GET /read)</h2>
+            <button id="fetchBtn" 
+                    class="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition duration-150 ease-in-out transform hover:scale-[1.01] mb-4">
+                Fetch All Data (GET)
+            </button>
+            
+            <div id="dataDisplay" class="bg-gray-50 border border-gray-200 p-4 rounded-lg text-sm font-mono text-gray-700">
+                Click "Fetch All Data" to see results here...
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://127.0.0.1:5000';
+        const messageBox = document.getElementById('messageBox');
+        const statusText = document.getElementById('statusText');
+        const dataDisplay = document.getElementById('dataDisplay');
+
+        /**
+         * Utility function to show status messages.
+         */
+        function showMessage(message, isError = false) {
+            statusText.textContent = message;
+            messageBox.classList.remove('hidden', 'bg-red-100', 'bg-green-100');
+            
+            if (isError) {
+                messageBox.classList.add('bg-red-100', 'text-red-800');
+            } else {
+                messageBox.classList.add('bg-green-100', 'text-green-800');
+            }
+
+            // Hide after 5 seconds
+            setTimeout(() => {
+                messageBox.classList.add('hidden');
+            }, 5000);
+        }
+
+        /**
+         * Handles the POST request to the /write endpoint.
+         */
+        document.getElementById('submitBtn').addEventListener('click', async () => {
+            const name = document.getElementById('nameInput').value.trim();
+            const description = document.getElementById('descInput').value.trim();
+
+            if (!name || !description) {
+                showMessage("Please enter both Name and Description.", true);
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/write`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ name, description })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showMessage(`Success: ${data.message}`, false);
+                    document.getElementById('nameInput').value = '';
+                    document.getElementById('descInput').value = '';
+                } else {
+                    showMessage(`Error (${response.status}): ${data.error || 'Server rejected the request.'}`, true);
+                }
+
+            } catch (error) {
+                showMessage(`Network Error: Could not reach the API at ${API_BASE_URL}. Is your Flask app running?`, true);
+                console.error('Fetch error:', error);
+            }
+        });
+
+        /**
+         * Handles the GET request to the /read endpoint.
+         */
+        document.getElementById('fetchBtn').addEventListener('click', async () => {
+            dataDisplay.textContent = 'Fetching data...';
+            try {
+                const response = await fetch(`${API_BASE_URL}/read`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Display the JSON data in a readable format
+                    dataDisplay.textContent = JSON.stringify(data, null, 2);
+                    showMessage(`Successfully fetched ${Array.isArray(data) ? data.length : 0} records.`, false);
+                } else {
+                    dataDisplay.textContent = `Error (${response.status}): ${data.error || 'Failed to fetch data.'}`;
+                    showMessage(`Error (${response.status}): Failed to read data.`, true);
+                }
+                
+            } catch (error) {
+                dataDisplay.textContent = `Network Error: Could not reach the API. Is your Flask app running?`;
+                showMessage(`Network Error: Could not reach the API at ${API_BASE_URL}.`, true);
+                console.error('Fetch error:', error);
+            }
+        });
+    </script>
+
+</body>
+</html>
+
