@@ -69,19 +69,12 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA Records, Accounts, 
 
 -- Create Tables and Insert Inital Rows
 
-CREATE OR REPLACE function create_med_tables()
-RETURNS void
-LANGUAGE plpgsql
-AS $$
-BEGIN
---Execute will allow the use of DDL commands
 
-        EXECUTE '
- 				CREATE TABLE IF NOT EXISTS patients.patients (
-                 -- Allows the incremention of id, Primary Key
-                User_Id SERIAL PRIMARY KEY,
-                First_Name VARCHAR(50),
-                Last_Name VARCHAR(50),
+CREATE TABLE IF NOT EXISTS patients.patients (
+ -- Allows the incremention of id, Primary Key
+User_Id SERIAL PRIMARY KEY,
+First_Name VARCHAR(50),
+ Last_Name VARCHAR(50),
                  -- Enforce Male, Female or Other
                 Gender VARCHAR(10)
                         CHECK (Gender IN ('Male', 'Female', 'Other')),
@@ -141,7 +134,7 @@ BEGIN
                         REFERENCES GP.gp (Gp_Id)
                         ON DELETE RESTRICT -- Prevent Deletion of a GP WITH records
         );	
-        ';
+        
 
         --Inform user if table already exists (Only works if run from select * from)
 
@@ -151,13 +144,4 @@ $$;
 
 -- Insert Test Data into Tables
 
-CREATE OR REPLACE function med_tables_test_data()
-RETURNS void
-LANGUAGE plpsql
-AS $$
-BEGIN
-	INSERT INTO users.users('PatientName','PlaceHolder')
-	VALUES ('PostGresUser','Forced to learn SQL'),
-	VALUES ('MedAdmin','Admin can read this');
-END;
-$$;
+
