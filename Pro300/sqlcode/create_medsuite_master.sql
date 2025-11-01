@@ -4,14 +4,15 @@
 
 DO
 $$
-BEGIN
 
 -- Data Declaration
-
+	
 DECLARE
 MedAdminChk SMALLINT;
 UserAppChk SMALLINT;
 GPAppChk SMALLINT;
+	
+BEGIN
 
 -- Check Users
 
@@ -47,7 +48,7 @@ END IF;
 
 
 
--- 2. Create the tables, schemas and grant rights
+-- 2. Create Schemas and grant rights to schemas
 
 -- Create Schemas
 
@@ -70,7 +71,7 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA Records, Accounts, 
 
 
 
--- Create Tables and Insert Inital Rows
+-- 3. Create Tables and where valid, indexes
 
 
 CREATE TABLE IF NOT EXISTS patients.patients (
@@ -142,6 +143,41 @@ First_Name VARCHAR(50),
         --Inform user if table already exists (Only works if run from select * from)
 
         RAISE NOTICE 'Tables already exist.';
+-- 4. Insert Data using earlier check
+
+IF (MedAdminChk = 0) THEN 
+-- Insert patients
+INSERT INTO patients.patients (First_Name, Last_Name, Gender, Email)
+VALUES
+    ('Alice', 'Johnson', 'Female', 'alice.johnson@example.com'),
+    ('Bob', 'Smith', 'Male', 'bob.smith@example.com'),
+    ('Clara', 'Nguyen', 'Female', 'clara.nguyen@example.com'),
+    ('David', 'Brown', 'Male', 'david.brown@example.com');
+
+-- Insert accounts (1:1 with patients)
+INSERT INTO accounts.users_accounts (User_Id, Email, Password_Hash)
+VALUES
+    (1, 'alice.johnson@example.com', 'hash_a1b2c3'),
+    (2, 'bob.smith@example.com', 'hash_d4e5f6'),
+    (3, 'clara.nguyen@example.com', 'hash_g7h8i9'),
+    (4, 'david.brown@example.com', 'hash_j1k2l3');
+
+-- Insert GPs
+INSERT INTO gp.gp (First_Name, Last_Name, Role, Employed_At)
+VALUES
+    ('Sarah', 'Lee', 'Doctor', 'City Health Clinic'),
+    ('John', 'Patel', 'Surgeon', 'Downtown General Hospital'),
+    ('Emily', 'Wong', 'Nurse', 'Community Medical Center');
+
+-- Insert records (linking patients ↔ GPs)
+INSERT INTO records.records (User_Id, Gp_Id, Record_Details, Practice)
+VALUES
+    (1, 1, 'Routine check-up. All vitals normal.', 'City Health Clinic'),
+    (2, 2, 'Appendectomy follow-up. Healing well.', 'Downtown General Hospital'),
+    (3, 3, 'Blood test and immunization administered.', 'Community Medical Center'),
+    (4, 1, 'High blood pressure noted. Recommended diet changes.', 'City Health Clinic');
+END IF;
+
 END;
 $$;
 
