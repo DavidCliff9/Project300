@@ -1,4 +1,4 @@
--This code creates the medical suite Database 
+-- This code creates the medical suite Database 
 
 -- 1. Check for users and create the database
 
