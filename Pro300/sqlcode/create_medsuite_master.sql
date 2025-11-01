@@ -16,14 +16,17 @@ GPAppChk SMALLINT;
 -- Check Users
 
 SELECT COUNT(rolname) 
+INTO MedAdminChk
 FROM pg_roles
 WHERE rolname = 'MedAdmin'
 
 SELECT COUNT(rolname)
+INTO UserAppChk
 FROM pg_roles 
 WHERE rolname = 'UserApplication'
 
 SELECT COUNT(rolname)
+INTO GPAppChk
 FROM pg_roles 
 WHERE rolname = 'GPApplication'
 
