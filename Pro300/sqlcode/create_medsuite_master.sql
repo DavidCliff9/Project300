@@ -56,7 +56,7 @@ CREATE SCHEMA Patients;
 
 -- User Privileges
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA Records, Accounts, GP, Users;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA Records, Accounts, GP, Patients;
 
 -- Finish Other Users (PlaceHolder)
 
