@@ -3,15 +3,12 @@
 -- 1. Check for users and create the database
 
 DO
-$$
-
+$$	
 -- Data Declaration
-	
-DECLARE
+DECLARE	
 MedAdminChk SMALLINT;
 UserAppChk SMALLINT;
-GPAppChk SMALLINT;
-	
+GPAppChk SMALLINT;	
 BEGIN
 
 -- Check Users
