@@ -76,30 +76,32 @@ CREATE TABLE IF NOT EXISTS patients.patients (
 User_Id SERIAL PRIMARY KEY,
 First_Name VARCHAR(50),
  Last_Name VARCHAR(50),
-                 -- Enforce Male, Female or Other
-                Gender VARCHAR(10)
-                        CHECK (Gender IN ('Male', 'Female', 'Other')),
-                Email VARCHAR(50) NOT NULL UNIQUE
-                 -- Eneforce Proper Email Entry (Any character before @, least one after before . and one after that)
-                        CHECK (Email LIKE('%@%_._%')
-                 -- Use Current Date if not date provided,
-                Signed_up_at DATE NOT NULL DEFAULT CURRENT_DATE
+-- Enforce Male, Female or Other
+Gender VARCHAR(10)
+    CHECK (Gender IN ('Male', 'Female', 'Other')),
+Email VARCHAR(50) NOT NULL UNIQUE
+-- Eneforce Proper Email Entry (Any character before @, least one after before . and one after that)
+ 	CHECK (Email LIKE('%@%_._%')
+-- Use Current Date if not date provided,
+Signed_up_at DATE NOT NULL DEFAULT CURRENT_DATE
+
+	);
 	
-         		-- !! Table should NEVER be used in Queries !!
-                CREATE TABLE IF NOT EXISTS accounts.users_accounts (
-                 -- Allows the incremention of id, Primary Key
-                Account_Id SERIAL PRIMARY KEY,
-                 -- Foreign Key 1:1
-                User_Id INT NOT NULL UNIQUE,
-                Email VARCHAR(50) NOT NULL UNIQUE
-                 -- Eneforce Proper Email Entry (Any character before @, least one after before . and one after that)
-                        CHECK (Email LIKE('%@%_._%'))
-                Password_Hash VARCHAR(255) NOT NULL,
-                 -- Foreign Key Constraint
-                CONSTRAINT fk_user_id
-                        FOREIGN KEY (UserId)
-                        REFERENCES patients.patients (User_Id)
-                        ON DELETE CASCADE -- Delete Account info if patient is deleted WITHOUT records
+-- !! Table should NEVER be used in Queries !!
+CREATE TABLE IF NOT EXISTS accounts.users_accounts (
+ -- Allows the incremention of id, Primary Key
+Account_Id SERIAL PRIMARY KEY,
+ -- Foreign Key 1:1
+User_Id INT NOT NULL UNIQUE,
+Email VARCHAR(50) NOT NULL UNIQUE
+ -- Eneforce Proper Email Entry (Any character before @, least one after before . and one after that)
+    CHECK (Email LIKE('%@%_._%'))
+Password_Hash VARCHAR(255) NOT NULL,
+-- Foreign Key Constraint
+CONSTRAINT fk_user_id
+    FOREIGN KEY (UserId)
+    REFERENCES patients.patients (User_Id)
+    ON DELETE CASCADE -- Delete Account info if patient is deleted WITHOUT records
         );
 
 
