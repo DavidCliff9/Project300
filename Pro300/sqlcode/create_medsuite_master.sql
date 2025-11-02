@@ -29,12 +29,13 @@ FROM pg_roles
 WHERE rolname = 'GPApplication';
 
 -- Create Users if not created
+-- Tells the PSQL block to execute SQL Commands
 
 IF (MedAdminChk = 0) THEN 
-CREATE USER MedAdmin WITH PASSWORD 'password';
-CREATE DATABASE MedicalSuite WITH OWNER = MedAdmin;
+EXECUTE 'CREATE USER MedAdmin WITH PASSWORD ''password'';
+CREATE DATABASE MedicalSuite WITH OWNER = MedAdmin;';
 END IF;
-
+/*
 IF (UserAppChk = 0) THEN
 CREATE USER UserApplication WITH PASSWORD 'password';  
 END IF;
@@ -43,7 +44,7 @@ IF (GPAppChk = 0) THEN
 CREATE USER GPApplication WITH PASSWORD 'password';  
 END IF;
 
-
+*/
 
 -- 2. Create Schemas and grant rights to schemas
 
