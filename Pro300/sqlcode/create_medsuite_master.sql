@@ -54,20 +54,6 @@ CREATE SCHEMA GP;
 CREATE SCHEMA Accounts;
 CREATE SCHEMA Patients;
 
--- User Privileges
-
-GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA Records, Accounts, GP, Patients;
-
--- Finish Other Users (PlaceHolder)
-
-
-
-
-
-
-
-
-
 -- 3. Create Tables and where valid, indexes
 
 
@@ -104,38 +90,37 @@ CONSTRAINT fk_user_id
     ON DELETE CASCADE -- Delete Account info if patient is deleted WITHOUT records
         );
 
-
-                CREATE TABLE IF NOT EXISTS GP.gp (
-                 -- Allows the incremention of Primary Key
-                Gp_Id SERIAL PRIMARY KEY,
-                First_Name VARCHAR(50) NOT NULL,
-                Last_Name VARCHAR(50) NOT NULL,
-                role VARCHAR(50) NOT NULL
-                 -- Enforce Correct Role Entry
-                        CHECK (role in ('Surgeon','Doctor', 'Nurse', 'Physiotherapist')),
-                employed_at VARCHAR(100)
+CREATE TABLE IF NOT EXISTS GP.gp (
+ -- Allows the incremention of Primary Key
+Gp_Id SERIAL PRIMARY KEY,
+First_Name VARCHAR(50) NOT NULL,
+Last_Name VARCHAR(50) NOT NULL,
+role VARCHAR(50) NOT NULL
+ -- Enforce Correct Role Entry
+    CHECK (role in ('Surgeon','Doctor', 'Nurse', 'Physiotherapist')),
+employed_at VARCHAR(100)
         );
 
-                CREATE TABLE IF NOT EXISTS records.records (
-                 -- Allows the incrementation of Primary Key
-                Record_Id SERIAL PRIMARY KEY,
-                 -- Foreign Keys to patient and GP table (Link Table)
-                User_Id INT NOT NULL,
-                Gp_Id INT NOT NULL,
-                 -- Body of the record
-                Record_Details TEXT NOT NULL,
-                Practice VARCHAR(100),
-                 -- If no value is entered, use the default timestamp
-                Created_At TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-                 -- Foreign Key Constraints
-                CONSTRAINT fk_user_record_id
-                        FOREIGN KEY (User_Id)
-                        REFERENCES patients.patients (User_Id)
-                        ON DELETE RESTRICT, -- Prevent Deletion of a patient WITH records
-                CONSTRAINT fk_gp_record_id
-                        FOREIGN KEY (Gp_Id)
-                        REFERENCES GP.gp (Gp_Id)
-                        ON DELETE RESTRICT -- Prevent Deletion of a GP WITH records
+CREATE TABLE IF NOT EXISTS records.records (
+ -- Allows the incrementation of Primary Key
+Record_Id SERIAL PRIMARY KEY,
+ -- Foreign Keys to patient and GP table (Link Table)
+User_Id INT NOT NULL,
+Gp_Id INT NOT NULL,
+ -- Body of the record
+Record_Details TEXT NOT NULL,
+Practice VARCHAR(100),
+ -- If no value is entered, use the default timestamp
+Created_At TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+ -- Foreign Key Constraints
+CONSTRAINT fk_user_record_id
+    FOREIGN KEY (User_Id)
+    REFERENCES patients.patients (User_Id)
+    ON DELETE RESTRICT, -- Prevent Deletion of a patient WITH records
+CONSTRAINT fk_gp_record_id
+    FOREIGN KEY (Gp_Id)
+    REFERENCES GP.gp (Gp_Id)
+    ON DELETE RESTRICT -- Prevent Deletion of a GP WITH records
         );	
         
 
@@ -179,6 +164,12 @@ END IF;
 
 END;
 $$;
+
+-- 5. User Privileges
+
+-- Finish Other Users (PlaceHolder)
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA Records, Accounts, GP, Patients;
 
 -- Insert Test Data into Tables
 
