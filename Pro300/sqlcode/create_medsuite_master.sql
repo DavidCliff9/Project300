@@ -83,7 +83,7 @@ Account_Id SERIAL PRIMARY KEY,
 User_Id INT NOT NULL UNIQUE,
 Email VARCHAR(50) NOT NULL UNIQUE
  -- Eneforce Proper Email Entry (Any character before @, least one after before . and one after that)
-    CHECK (Email LIKE('%@%_._%'))
+    CHECK (Email LIKE('%@%_._%')),
 Password_Hash VARCHAR(255) NOT NULL,
 -- Foreign Key Constraint
 CONSTRAINT fk_user_id
