@@ -49,7 +49,7 @@ END IF;
 END;
 $$;
 
---\c medicalsuite postgres
+/c medicalsuite
 -- 2. Create Schemas and grant rights to schemas
 
 -- Create Schemas
