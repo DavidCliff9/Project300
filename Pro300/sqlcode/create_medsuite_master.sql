@@ -69,7 +69,7 @@ Gender VARCHAR(10)
     CHECK (Gender IN ('Male', 'Female', 'Other')),
 Email VARCHAR(50) NOT NULL UNIQUE
 -- Eneforce Proper Email Entry (Any character before @, least one after before . and one after that)
- 	CHECK (Email LIKE('%@%_._%')
+ 	CHECK (Email LIKE('%@%_._%')),
 -- Use Current Date if not date provided,
 Signed_up_at DATE NOT NULL DEFAULT CURRENT_DATE
 
