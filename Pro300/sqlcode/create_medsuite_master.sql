@@ -88,7 +88,7 @@ Email VARCHAR(50) NOT NULL UNIQUE
 Password_Hash VARCHAR(255) NOT NULL,
 -- Foreign Key Constraint
 CONSTRAINT fk_user_id
-    FOREIGN KEY (UserId)
+    FOREIGN KEY (User_Id)
     REFERENCES patients.patients (User_Id)
     ON DELETE CASCADE -- Delete Account info if patient is deleted WITHOUT records
         );
