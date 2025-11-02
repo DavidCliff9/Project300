@@ -136,38 +136,49 @@ CONSTRAINT fk_gp_record_id
        -- RAISE NOTICE 'Tables already exist.';
 -- 4. Insert Data using earlier check
 
-IF (MedAdminChk = 0) THEN 
--- Insert patients
+-- Insert Patients
 INSERT INTO patients.patients (First_Name, Last_Name, Gender, Email)
 VALUES
     ('Alice', 'Johnson', 'Female', 'alice.johnson@example.com'),
     ('Bob', 'Smith', 'Male', 'bob.smith@example.com'),
     ('Clara', 'Nguyen', 'Female', 'clara.nguyen@example.com'),
-    ('David', 'Brown', 'Male', 'david.brown@example.com');
+    ('David', 'Brown', 'Male', 'david.brown@example.com')
+ON CONFLICT (Email) DO NOTHING; -- Emails have to be unique, if PostGre detects the same Email skip the insert
 
--- Insert accounts (1:1 with patients)
+-- Insert Accounts (1:1 mapping with patients)
+-- We assume User_Id matches the patient IDs above (serial), so we can use subqueries
 INSERT INTO accounts.users_accounts (User_Id, Email, Password_Hash)
 VALUES
-    (1, 'alice.johnson@example.com', 'hash_a1b2c3'),
-    (2, 'bob.smith@example.com', 'hash_d4e5f6'),
-    (3, 'clara.nguyen@example.com', 'hash_g7h8i9'),
-    (4, 'david.brown@example.com', 'hash_j1k2l3');
+    ((SELECT User_Id FROM patients.patients WHERE Email='alice.johnson@example.com'), 'alice.johnson@example.com', 'hash_a1b2c3'),
+    ((SELECT User_Id FROM patients.patients WHERE Email='bob.smith@example.com'), 'bob.smith@example.com', 'hash_d4e5f6'),
+    ((SELECT User_Id FROM patients.patients WHERE Email='clara.nguyen@example.com'), 'clara.nguyen@example.com', 'hash_g7h8i9'),
+    ((SELECT User_Id FROM patients.patients WHERE Email='david.brown@example.com'), 'david.brown@example.com', 'hash_j1k2l3')
+ON CONFLICT (User_Id) DO NOTHING;
 
 -- Insert GPs
 INSERT INTO gp.gp (First_Name, Last_Name, Role, Employed_At)
 VALUES
     ('Sarah', 'Lee', 'Doctor', 'City Health Clinic'),
     ('John', 'Patel', 'Surgeon', 'Downtown General Hospital'),
-    ('Emily', 'Wong', 'Nurse', 'Community Medical Center');
+    ('Emily', 'Wong', 'Nurse', 'Community Medical Center')
+ON CONFLICT (Gp_Id) DO NOTHING;
 
--- Insert records (linking patients ↔ GPs)
+-- Insert Records (linking patients ↔ GPs)
 INSERT INTO records.records (User_Id, Gp_Id, Record_Details, Practice)
 VALUES
-    (1, 1, 'Routine check-up. All vitals normal.', 'City Health Clinic'),
-    (2, 2, 'Appendectomy follow-up. Healing well.', 'Downtown General Hospital'),
-    (3, 3, 'Blood test and immunization administered.', 'Community Medical Center'),
-    (4, 1, 'High blood pressure noted. Recommended diet changes.', 'City Health Clinic');
-END IF;
+    ((SELECT User_Id FROM patients.patients WHERE Email='alice.johnson@example.com'), 
+     (SELECT Gp_Id FROM gp.gp WHERE First_Name='Sarah' AND Last_Name='Lee'),
+     'Routine check-up. All vitals normal.', 'City Health Clinic'),
+    ((SELECT User_Id FROM patients.patients WHERE Email='bob.smith@example.com'), 
+     (SELECT Gp_Id FROM gp.gp WHERE First_Name='John' AND Last_Name='Patel'),
+     'Appendectomy follow-up. Healing well.', 'Downtown General Hospital'),
+    ((SELECT User_Id FROM patients.patients WHERE Email='clara.nguyen@example.com'), 
+     (SELECT Gp_Id FROM gp.gp WHERE First_Name='Emily' AND Last_Name='Wong'),
+     'Blood test and immunization administered.', 'Community Medical Center'),
+    ((SELECT User_Id FROM patients.patients WHERE Email='david.brown@example.com'), 
+     (SELECT Gp_Id FROM gp.gp WHERE First_Name='Sarah' AND Last_Name='Lee'),
+     'High blood pressure noted. Recommended diet changes.', 'City Health Clinic')
+ON CONFLICT (Record_Id) DO NOTHING;
 
 -- 5. User Privileges
 
@@ -175,7 +186,7 @@ END IF;
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA records TO medadmin;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA accounts TO medadmin;
-GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA gpo TO medadmin;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA gp TO medadmin;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA patients TO medadmin;
 
 -- Insert Test Data into Tables
