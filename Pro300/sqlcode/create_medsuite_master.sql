@@ -55,9 +55,6 @@ CREATE SCHEMA IF NOT EXISTS GP;
 CREATE SCHEMA IF NOT EXISTS Accounts;
 CREATE SCHEMA IF NOT EXISTS Patients;
 
--- Ensures Creation of schemas 
-
-COMMIT;
 
 -- 3. Create Tables and where valid, indexes
 
@@ -165,7 +162,6 @@ VALUES
     (2, 2, 'Appendectomy follow-up. Healing well.', 'Downtown General Hospital'),
     (3, 3, 'Blood test and immunization administered.', 'Community Medical Center'),
     (4, 1, 'High blood pressure noted. Recommended diet changes.', 'City Health Clinic');
-COMMIT;
 END IF;
 
 END;
