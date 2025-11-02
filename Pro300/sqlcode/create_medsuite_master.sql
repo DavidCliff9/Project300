@@ -16,7 +16,7 @@ BEGIN
 SELECT COUNT(rolname) 
 INTO MedAdminChk
 FROM pg_roles
-WHERE rolname = 'MedAdmin';
+WHERE rolname = 'medadmin';
 
 SELECT COUNT(rolname)
 INTO UserAppChk
