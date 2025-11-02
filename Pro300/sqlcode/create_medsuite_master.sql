@@ -32,8 +32,8 @@ WHERE rolname = 'GPApplication';
 -- Tells the PSQL block to execute SQL Commands
 
 IF (MedAdminChk = 0) THEN 
-EXECUTE 'CREATE USER MedAdmin WITH PASSWORD ''password'';
-CREATE DATABASE MedicalSuite WITH OWNER = MedAdmin;';
+EXECUTE 'CREATE USER medadmin WITH PASSWORD ''password'';
+CREATE DATABASE medicalsuite WITH OWNER = medadmin;';
 END IF;
 /*
 IF (UserAppChk = 0) THEN
@@ -46,15 +46,19 @@ END IF;
 
 */
 
+END;
+$$;
+
+\c medicalsuite medadmin
 -- 2. Create Schemas and grant rights to schemas
 
 -- Create Schemas
 -- IF NOT EXISTS allows the script to re-run and avoid termination when running into existing schema
 
-CREATE SCHEMA IF NOT EXISTS Records;
-CREATE SCHEMA IF NOT EXISTS GP;
-CREATE SCHEMA IF NOT EXISTS Accounts;
-CREATE SCHEMA IF NOT EXISTS Patients;
+CREATE SCHEMA IF NOT EXISTS records;
+CREATE SCHEMA IF NOT EXISTS gp;
+CREATE SCHEMA IF NOT EXISTS accounts;
+CREATE SCHEMA IF NOT EXISTS patients;
 
 
 -- 3. Create Tables and where valid, indexes
@@ -93,7 +97,7 @@ CONSTRAINT fk_user_id
     ON DELETE CASCADE -- Delete Account info if patient is deleted WITHOUT records
         );
 
-CREATE TABLE IF NOT EXISTS GP.gp (
+CREATE TABLE IF NOT EXISTS gp.gp (
  -- Allows the incremention of Primary Key
 Gp_Id SERIAL PRIMARY KEY,
 First_Name VARCHAR(50) NOT NULL,
@@ -129,7 +133,7 @@ CONSTRAINT fk_gp_record_id
 
         --Inform user if table already exists (Only works if run from select * from)
 
-        RAISE NOTICE 'Tables already exist.';
+       -- RAISE NOTICE 'Tables already exist.';
 -- 4. Insert Data using earlier check
 
 IF (MedAdminChk = 0) THEN 
@@ -165,17 +169,14 @@ VALUES
     (4, 1, 'High blood pressure noted. Recommended diet changes.', 'City Health Clinic');
 END IF;
 
-END;
-$$;
-
 -- 5. User Privileges
 
 -- Finish Other Users (PlaceHolder)
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA Records TO MedAdmin;
-GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA Accounts TO MedAdmin;
-GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA GP TO MedAdmin;
-GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA Patients TO MedAdmin;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA records TO medadmin;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA accounts TO medadmin;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA gpo TO medadmin;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA patients TO medadmin;
 
 -- Insert Test Data into Tables
 
