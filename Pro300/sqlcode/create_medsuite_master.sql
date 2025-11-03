@@ -6,18 +6,14 @@ DO
 $$	
 -- Data Declaration
 DECLARE	
-DatabaseChk SMALLINT;
 MedAdminChk SMALLINT;
 UserAppChk SMALLINT;
 GPAppChk SMALLINT;	
 BEGIN
 
 -- Check Users by selecting against
-	-- Add in a database checker instead of using it with MedAdmain (DatabaseCheck)
-Select COUNT(datname)
-INTO DatabaseChk
-FROM pg_database
-WHERE datname = 'medicalsuite';
+
+
 	
 SELECT COUNT(rolname) 
 INTO MedAdminChk
@@ -43,9 +39,7 @@ IF (MedAdminChk = 0) THEN
 EXECUTE 'CREATE USER medadmin WITH PASSWORD ''password'';';
 END IF;
 
-IF (DatabaseChk = 0) THEN
-EXECUTE 'CREATE DATABASE medicalsuite WITH OWNER = medadmin;';
-END IF;
+
 
 /*
 IF (UserAppChk = 0) THEN
@@ -60,6 +54,17 @@ END IF;
 
 END;
 $$;
+
+-- This is a psql variable. It will execute this search and store it for use within the script. -T no header, -A unaligned and -C run command
+
+\set db_exists 'psql -tAc Select COUNT(datname) FROM pg_database WHERE datname = ''medicalsuite''';
+
+\if :db_exists
+	\echo 'Database exists'
+\else
+	CREATE DATABASE medicalsuite WITH OWNER = medadmin;
+\endif
+
 
 \c medicalsuite
 	
