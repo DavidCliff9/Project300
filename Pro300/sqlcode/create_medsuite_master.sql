@@ -6,6 +6,7 @@ DO
 $$	
 -- Data Declaration
 DECLARE	
+DatabaseChk SMALLINT;
 MedAdminChk SMALLINT;
 UserAppChk SMALLINT;
 GPAppChk SMALLINT;	
@@ -13,7 +14,11 @@ BEGIN
 
 -- Check Users by selecting against
 	-- Add in a database checker instead of using it with MedAdmain (DatabaseCheck)
-
+Select COUNT(datname)
+INTO DatabaseChk
+FROM pg_database;
+WHERE datname = 'medicalsuite'
+	
 SELECT COUNT(rolname) 
 INTO MedAdminChk
 FROM pg_roles
@@ -29,13 +34,19 @@ INTO GPAppChk
 FROM pg_roles 
 WHERE rolname = 'GPApplication';
 
--- Create Users if not created
+-- Create Users and Database if not created
 -- Tells the PSQL block to execute SQL Commands
 
+
+
 IF (MedAdminChk = 0) THEN 
-EXECUTE 'CREATE USER medadmin WITH PASSWORD ''password'';
-CREATE DATABASE medicalsuite WITH OWNER = medadmin;';
+EXECUTE 'CREATE USER medadmin WITH PASSWORD ''password'';';
 END IF;
+
+IF (DatabaseChk = 0) THEN
+EXECUTE 'CREATE DATABASE medicalsuite WITH OWNER = medadmin;';
+END IF;
+
 /*
 IF (UserAppChk = 0) THEN
 CREATE USER UserApplication WITH PASSWORD 'password';  
