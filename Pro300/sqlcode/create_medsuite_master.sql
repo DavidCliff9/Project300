@@ -11,7 +11,8 @@ UserAppChk SMALLINT;
 GPAppChk SMALLINT;	
 BEGIN
 
--- Check Users
+-- Check Users by selecting against
+	-- Add in a database checker instead of using it with MedAdmain (DatabaseCheck)
 
 SELECT COUNT(rolname) 
 INTO MedAdminChk
@@ -50,6 +51,7 @@ END;
 $$;
 
 \c medicalsuite
+	
 -- 2. Create Schemas and grant rights to schemas
 
 -- Create Schemas
@@ -130,10 +132,6 @@ CONSTRAINT fk_gp_record_id
     ON DELETE RESTRICT -- Prevent Deletion of a GP WITH records
         );	
         
-
-        --Inform user if table already exists (Only works if run from select * from)
-
-       -- RAISE NOTICE 'Tables already exist.';
 -- 4. Insert Data using earlier check
 
 -- Insert Patients
@@ -182,12 +180,17 @@ ON CONFLICT (Record_Id) DO NOTHING;
 
 -- 5. User Privileges
 
--- Finish Other Users (PlaceHolder)
-
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA records TO medadmin;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA accounts TO medadmin;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA gp TO medadmin;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA patients TO medadmin;
+
+-- Finish Other Users (PlaceHolder)
+
+ALTER SCHEMA records OWNER TO medadmin;
+ALTER SCHEMA accounts OWNER TO medadmin;
+ALTER SCHEMA gp OWNER TO medadmin;
+ALTER SCHEMA patients OWNER TO medadmin;
 
 -- Insert Test Data into Tables
 
