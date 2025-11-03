@@ -16,8 +16,8 @@ BEGIN
 	-- Add in a database checker instead of using it with MedAdmain (DatabaseCheck)
 Select COUNT(datname)
 INTO DatabaseChk
-FROM pg_database;
-WHERE datname = 'medicalsuite'
+FROM pg_database
+WHERE datname = 'medicalsuite';
 	
 SELECT COUNT(rolname) 
 INTO MedAdminChk
