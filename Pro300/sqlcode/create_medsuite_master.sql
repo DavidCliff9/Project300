@@ -23,7 +23,7 @@ WHERE rolname = 'medadmin';
 SELECT COUNT(rolname)
 INTO UserAppChk
 FROM pg_roles 
-WHERE rolname = 'UserApplication';
+WHERE rolname = 'userapplication';
 
 SELECT COUNT(rolname)
 INTO GPAppChk
@@ -41,11 +41,11 @@ END IF;
 
 
 
-/*
-IF (UserAppChk = 0) THEN
-CREATE USER UserApplication WITH PASSWORD 'password';  
-END IF;
 
+IF (UserAppChk = 0) THEN
+CREATE USER userapplication WITH PASSWORD 'password';  
+END IF;
+/*
 IF (GPAppChk = 0) THEN 
 CREATE USER GPApplication WITH PASSWORD 'password';  
 END IF;
@@ -77,6 +77,7 @@ CREATE SCHEMA IF NOT EXISTS records;
 CREATE SCHEMA IF NOT EXISTS gp;
 CREATE SCHEMA IF NOT EXISTS accounts;
 CREATE SCHEMA IF NOT EXISTS patients;
+CREATE SCHEMA IF NOT EXISTS admin;
 
 
 -- 3. Create Tables and where valid, indexes
@@ -147,6 +148,14 @@ CONSTRAINT fk_gp_record_id
     REFERENCES GP.gp (Gp_Id)
     ON DELETE RESTRICT -- Prevent Deletion of a GP WITH records
         );	
+
+CREATE TABLE IF NOT EXISTS admin.errorlog (
+ -- Allows the incrementation of Primary Key
+Error_Id SERIAL PRIMARY KEY,
+Error_msg VARCHAR(50),
+ -- If no value is entered, use the default timestamp
+Created_At TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        );	
         
 -- 4. Insert Data using earlier check
 
@@ -160,7 +169,7 @@ VALUES
 ON CONFLICT (Email) DO NOTHING; -- Emails have to be unique, if PostGre detects the same Email skip the insert
 
 -- Insert Accounts (1:1 mapping with patients)
--- We assume User_Id matches the patient IDs above (serial), so we can use subqueries
+-- We assume User_Id matches the patient IDs above (serial), so we can use subqueries. Select the ID from the patient table where the email exists
 INSERT INTO accounts.users_accounts (User_Id, Email, Password_Hash)
 VALUES
     ((SELECT User_Id FROM patients.patients WHERE Email='alice.johnson@example.com'), 'alice.johnson@example.com', 'hash_a1b2c3'),
@@ -177,7 +186,7 @@ VALUES
     ('Emily', 'Wong', 'Nurse', 'Community Medical Center')
 ON CONFLICT (Gp_Id) DO NOTHING;
 
--- Insert Records (linking patients ↔ GPs)
+-- Insert Records 
 INSERT INTO records.records (User_Id, Gp_Id, Record_Details, Practice)
 VALUES
     ((SELECT User_Id FROM patients.patients WHERE Email='alice.johnson@example.com'), 
@@ -196,18 +205,30 @@ ON CONFLICT (Record_Id) DO NOTHING;
 
 -- 5. User Privileges
 
+-- Tables are seperted into schemas to allow Granular Control
+
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA records TO medadmin;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA accounts TO medadmin;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA gp TO medadmin;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA patients TO medadmin;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA admin TO medadmin;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA patients TO medadmin;
 
--- Finish Other Users (PlaceHolder)
+GRANT SELECT ON ALL TABLES IN SCHEMA records TO userapplication;
+GRANT SELECT, INSERT, UPDATE ON ALL TABLES IN SCHEMA accounts TO userapplication;
+GRANT SELECT ON ALL TABLES IN SCHEMA gp TO userapplication;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA patients TO userapplication;
+GRANT INSERT ON ALL TABLES IN SCHEMA admin TO userapplication;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA patients TO userapplication;
 
 ALTER SCHEMA records OWNER TO medadmin;
 ALTER SCHEMA accounts OWNER TO medadmin;
 ALTER SCHEMA gp OWNER TO medadmin;
 ALTER SCHEMA patients OWNER TO medadmin;
+
+-- Finish Other Users (PlaceHolder)
+
+
 
 -- Insert Test Data into Tables
 
