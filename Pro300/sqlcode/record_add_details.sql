@@ -25,7 +25,7 @@ INSERT INTO records.records (User_Id, GP_Id, Record_Details, Practice)
 -- Using Subqueries to find the relevant foreign keys to insert into the table from Email and Names
 VALUES ((SELECT User_Id FROM patients.patients WHERE Email=EPatientEmail),
 (SELECT Gp_Id FROM gp.gp WHERE First_Name=EGPFirstName AND Last_Name=EGPLastName),
-ERecordDetails, EPractice);
+ERecordDetails, EPractice)
 RETURNING user_id INTO return_msg;
 
 -- Return a message
