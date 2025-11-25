@@ -184,7 +184,7 @@ VALUES
     ('Sarah', 'Lee', 'Doctor', 'City Health Clinic'),
     ('John', 'Patel', 'Surgeon', 'Downtown General Hospital'),
     ('Emily', 'Wong', 'Nurse', 'Community Medical Center')
-ON CONFLICT (Gp_Id) DO NOTHING;
+ON CONFLICT (First_Name, Last_Name) DO NOTHING;
 
 -- Insert Records 
 INSERT INTO records.records (User_Id, Gp_Id, Record_Details, Practice)
@@ -213,6 +213,9 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA gp TO medadmin;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA patients TO medadmin;
 GRANT USAGE, SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA admin TO medadmin;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA patients TO medadmin;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA accounts TO medadmin;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA gp TO medadmin;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA records TO medadmin;
 
 GRANT SELECT ON ALL TABLES IN SCHEMA records TO userapplication;
 GRANT SELECT, INSERT, UPDATE ON ALL TABLES IN SCHEMA accounts TO userapplication;
