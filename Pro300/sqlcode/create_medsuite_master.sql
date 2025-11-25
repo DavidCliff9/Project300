@@ -152,7 +152,7 @@ CONSTRAINT fk_gp_record_id
 CREATE TABLE IF NOT EXISTS admin.errorlog (
  -- Allows the incrementation of Primary Key
 Error_Id SERIAL PRIMARY KEY,
-Error_msg VARCHAR(50),
+Error_msg VARCHAR(500),
  -- If no value is entered, use the default timestamp
 Created_At TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
         );	
