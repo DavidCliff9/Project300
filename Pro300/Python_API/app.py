@@ -9,7 +9,7 @@ with open('config.json', 'r') as file:
             config = json.load(file)
           
 # database configuration
-db_table = config['postgres'].get("db_table")
+# db_table = config['postgres'].get("db_table")
 
 # Home route, displays a message
 @app.route('/')
@@ -50,9 +50,21 @@ def read():
 @app.route('/writerecord', methods=['POST'])
 def write():
     data = request.json
-#generates SQL from JSON - The placeholder values prevent SQL Injection attacks
-    query = f'CALL add_record_master(email, gpfirstname, gplastname, recorddetail, practice);'
+#generates SQL from JSON - The placeholder values prevent SQL Injection attacks and avoids PostGre from searching columns    q
+    query = f'CALL add_record_master(%s, %s, %s, %s, %s);'
     params = (data['email'], data['gpfirstname'], data['gplastname'], data['recorddetail'], data['practice'])
+    try:
+        db.write_to_db(query, params)
+        return jsonify({'message': 'Data inserted successfully!'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+@app.route('/adduser', methods=['POST'])
+def write():
+    data = request.json
+#generates SQL from JSON - The placeholder values prevent SQL Injection attacks and avoids PostGre from searching columns    q
+    query = f'CALL add_user_master(%s, %s, %s, %s, %s, %s);'
+    params = (data['firstname'], data['lastname'], data['gender'], data['email'], data['password'])
     try:
         db.write_to_db(query, params)
         return jsonify({'message': 'Data inserted successfully!'})
