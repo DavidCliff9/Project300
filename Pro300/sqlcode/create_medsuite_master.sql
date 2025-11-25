@@ -154,7 +154,7 @@ CREATE TABLE IF NOT EXISTS admin.errorlog (
 Error_Id SERIAL PRIMARY KEY,
 Error_msg VARCHAR(50),
  -- If no value is entered, use the default timestamp
-Created_At TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+Created_At TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
         );	
         
 -- 4. Insert Data using earlier check
