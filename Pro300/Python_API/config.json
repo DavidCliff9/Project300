@@ -2,8 +2,7 @@
 	"postgres": {
 	"host": "127.0.0.1",
 	"port": 5432,
-	"database": "pitestdb",
-	"user": "pi",
-	"password": "password",
-	"db_table": "FlaskAPITable" }
+	"database": "medicalsuite",
+	"user": "medadmin",
+	"password": "password" }
 }
