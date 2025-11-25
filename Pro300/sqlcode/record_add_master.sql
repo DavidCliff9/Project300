@@ -2,6 +2,7 @@
 -- It will search to ensure the patient exists, ensuring data
 
 CREATE OR REPLACE PROCEDURE add_record_master(EPatientEmail VARCHAR(50),
+EGPFirstName VARCHAR(50),
 EGPLastName VARCHAR(50),
 ERecordDetails TEXT,
 EPractice VARCHAR(50))
@@ -23,14 +24,14 @@ BEGIN
 SELECT COUNT(email)
 INTO ValidEmailChk
 FROM patients.patients
-WHERE email = EEmail;
+WHERE email = EPatientEmail;
 
 -- Query the GP Table to see if the GP already exists (Retreived through enviornmental variable)
 
-SELECT COUNT(firstname)
+SELECT COUNT(first_name)
 INTO ValidGPChk
 FROM gp.gp
-WHERE firstname = EGPFirstName AND lastname = EGPLastName;
+WHERE first_name = EGPFirstName AND last_name = EGPLastName;
 
 -- Query the Practuce Table to see if the Practice exists
 
