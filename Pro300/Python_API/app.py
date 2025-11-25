@@ -34,14 +34,11 @@ def delete():
         return jsonify({'error': str(e)}), 500
 
 
-def home():
-    return 'Welcome to the Pro300 App'
-
 # Read Data route, a get requests an endpoint from the PostgresSQL database.
 # A query is built from the JSON config
-@app.route('/read', methods=['GET'])
+@app.route('/readrecords', methods=['GET'])
 def read():
-    query = f'SELECT * FROM {db_table};'
+    query = f'SELECT * FROM records.records;'
     try:
         result = db.read_from_db(query)
         return jsonify(result)
@@ -50,12 +47,12 @@ def read():
     
 # Write data route, a get requests an endpoint from the PostgresSQL database.
 # A query is built by creating a JSON format.
-@app.route('/write', methods=['POST'])
+@app.route('/writerecord', methods=['POST'])
 def write():
     data = request.json
 #generates SQL from JSON - The placeholder values prevent SQL Injection attacks
-    query = f'INSERT INTO {db_table} (name, description) VALUES (%s, %s);'
-    params = (data['name'], data['description'])
+    query = f'CALL add_record_master(email, gpfirstname, gplastname, recorddetail, practice);'
+    params = (data['email'], data['gpfirstname'], data['gplastname'], data['recorddetail'], data['practice'])
     try:
         db.write_to_db(query, params)
         return jsonify({'message': 'Data inserted successfully!'})
