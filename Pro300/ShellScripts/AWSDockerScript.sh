@@ -9,7 +9,7 @@ sudo chmod +x /usr/local/bin/docker-compose
 echo "Installed various packages" >> ~/ShellScriptLog.log
 
 # Clone the latest build
-git clone https://github.com/DavidCliff9/PostgresDockerIntegration
+git clone https://github.com/Medical-Record-System/Postgres-Docker
 
 # Start the Docker version
 sudo systemctl start docker
