@@ -59,5 +59,5 @@ EXCEPTION
 	RAISE NOTICE 'Error Logged. Contact Admin';
 END;
 	
-end; $$
-S
+end; 
+$$;
