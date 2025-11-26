@@ -4,7 +4,8 @@
 CREATE OR REPLACE PROCEDURE add_patient_master(EFirstName VARCHAR(50), 
 ELastName VARCHAR(50), 
 EGender VARCHAR(10), 
-EEmail VARCHAR(50))
+EEmail VARCHAR(50),
+EPassword VARCHAR(255))
 LANGUAGE plpgsql
 AS $$
 DECLARE
@@ -47,7 +48,7 @@ END IF;
 -- Try
 BEGIN
 	-- Insert Into Patient Tables
-	NewPatientId := add_patient_details(EFirstName, ELastName, EGender, EEmail);
+	NewPatientId := add_patient_details(EFirstName, ELastName, EGender, EEmail, EPassword);
 	RAISE NOTICE 'User Created: %', NewPatientId;
 
 -- Handling Errors Gracefully
