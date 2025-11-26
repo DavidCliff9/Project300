@@ -3,7 +3,8 @@
 CREATE OR REPLACE FUNCTION add_patient_details(EFirstName VARCHAR(50), 
 ELastName VARCHAR(50),
 EGENDER VARCHAR(10), 
-EEmail VARCHAR(50)
+EEmail VARCHAR(50),
+EPassword VARCHAR(255)
 )
 
 -- Return int to master procedure
@@ -19,6 +20,9 @@ return_msg int;
 
 BEGIN
 
+INSERT INTO accounts.users_accounts (email, password_hash)
+VALUES (EEmail, EPassword)
+  
 -- Insert into patient table
 
 INSERT INTO patients.patients (first_name, last_name, gender, email)
