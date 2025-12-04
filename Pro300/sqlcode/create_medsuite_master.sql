@@ -236,4 +236,256 @@ ALTER SCHEMA admin OWNER TO medadmin;
 
 -- Insert Test Data into Tables
 
+-- 6. Stored Procedures and Functions
+
+CREATE OR REPLACE FUNCTION error_log(EErrorMSG VARCHAR(50))
+
+-- Use plpgsql and create function
+-- Return nothig
+
+RETURNS void
+LANGUAGE plpgsql
+AS $$
+DECLARE
+
+-- Declare Variables
+
+BEGIN
+
+-- Insert error message and timestamp from stored procedures upon reaching an error
+
+INSERT INTO admin.errorlog (error_msg)
+VALUES (EErrorMSG);
+
+END;
+$$;
+
+-- This Function will insert details once it passes checks from the stored procedure its called
+
+CREATE OR REPLACE FUNCTION add_record_details(EPatientEmail VARCHAR(50),
+EGPFirstName VARCHAR(50),
+EGPLastName VARCHAR(50),
+ERecordDetails TEXT,
+EPractice VARCHAR(50))
+
+-- Return int to master procedure
+
+RETURNS int
+LANGUAGE plpgsql
+AS $$
+DECLARE
+
+-- Declare Variables
+
+return_msg int;
+
+BEGIN
+
+-- Insert into records table
+
+INSERT INTO records.records (User_Id, GP_Id, Record_Details, Practice)
+-- Using Subqueries to find the relevant foreign keys to insert into the table from Email and Names
+VALUES ((SELECT User_Id FROM patients.patients WHERE Email=EPatientEmail),
+(SELECT Gp_Id FROM gp.gp WHERE First_Name=EGPFirstName AND Last_Name=EGPLastName),
+ERecordDetails, EPractice)
+RETURNING user_id INTO return_msg;
+
+-- Return a message
+
+RETURN return_msg;
+
+END;
+$$;
+
+-- This Procedure will work with Flask API to add a record to the patient Database
+-- It will search to ensure the patient exists, ensuring data
+
+CREATE OR REPLACE PROCEDURE add_record_master(EPatientEmail VARCHAR(50),
+EGPFirstName VARCHAR(50),
+EGPLastName VARCHAR(50),
+ERecordDetails TEXT,
+EPractice VARCHAR(50))
+LANGUAGE plpgsql
+AS $$
+DECLARE
+-- Variables go here
+
+ValidEmailChk SMALLINT;
+ValidGPChk SMALLINT;
+ValidGenderChk SMALLINT;
+NewRecordId INT;
+
+BEGIN
+-- 1. Read in Data 
+
+-- Query the Patient Table to see if the email already exists
+
+SELECT COUNT(email)
+INTO ValidEmailChk
+FROM patients.patients
+WHERE email = EPatientEmail;
+
+-- Query the GP Table to see if the GP already exists (Retreived through enviornmental variable)
+
+SELECT COUNT(first_name)
+INTO ValidGPChk
+FROM gp.gp
+WHERE first_name = EGPFirstName AND last_name = EGPLastName;
+
+-- Query the Practuce Table to see if the Practice exists
+
+--SELECT COUNT(email)
+--INTO ValidEmailChk
+--FROM patients.patients
+--WHERE email = EEmail;
+
+-- 2. Perform Logcial Operations on the Data
+
+-- Check if email is in a valid format as per constraint
+IF (EPatientEmail NOT LIKE ('%@%_._%')) THEN
+	RAISE EXCEPTION 'Invalid Email format detected: %', EPatientEmail
+		USING hint = 'Validate Email';
+END IF;
+
+-- Check if Patient Exists
+IF (ValidEmailChk = 0) THEN
+	RAISE EXCEPTION 'Patient does not exist: '
+		USING hint = 'Please check details entered';
+END IF;
+
+-- Check if GP Exists
+IF (ValidGPChk = 0) THEN
+        RAISE EXCEPTION 'Patient does not exist: '
+                USING hint = 'Please check details entered';
+END IF;
+
+--IF (EEmail NOT LIKE ('%@%_._%')) THEN
+--        RAISE EXCEPTION 'Invalid Email format detected: %', EEmail
+--                USING hint = 'Validate Email';
+--END IF;
+
+-- 3. Perform Data Insertion with Error Handling
+
+-- Try
+BEGIN
+	-- Insert Into Record Table
+	NewRecordId := add_record_details(EPatientEmail,
+EGPFirstName,
+EGPLastName,
+ERecordDetails,
+EPractice);
+	RAISE NOTICE 'User Created: %', NewRecordId;
+
+-- Handling Errors Gracefully
+EXCEPTION
+	-- Fallback
+	WHEN others THEN
+	PERFORM error_log(SQLERRM);
+	RAISE NOTICE 'Error Logged. Contact Admin';
+END;
+	
+end; $$;
+
+-- This Function will insert details once it passes checks from the stored procedure its called
+
+CREATE OR REPLACE FUNCTION add_patient_details(EFirstName VARCHAR(50), 
+ELastName VARCHAR(50),
+EGENDER VARCHAR(10), 
+EEmail VARCHAR(50),
+EPassword VARCHAR(255)
+)
+
+-- Return int to master procedure
+
+RETURNS int
+LANGUAGE plpgsql
+AS $$
+DECLARE
+
+-- Declare Variables
+
+return_msg int;
+
+BEGIN
+
+INSERT INTO accounts.users_accounts (email, password_hash)
+VALUES (EEmail, EPassword)
+  
+-- Insert into patient table
+
+INSERT INTO patients.patients (first_name, last_name, gender, email)
+VALUES (EFirstName, ELastName, EGender, EEmail)
+RETURNING user_id INTO return_msg;
+
+-- Return a message
+
+RETURN return_msg; 
+
+END;
+$$;
+
+-- This Procedure will work with Flask API to add a user to the patient Database
+-- It will first insert into the accounts table, then into the patients table
+
+CREATE OR REPLACE PROCEDURE add_patient_master(EFirstName VARCHAR(50), 
+ELastName VARCHAR(50), 
+EGender VARCHAR(10), 
+EEmail VARCHAR(50),
+EPassword VARCHAR(255))
+LANGUAGE plpgsql
+AS $$
+DECLARE
+-- Variables go here
+
+ValidEmailChk SMALLINT;
+ValidGenderChk SMALLINT;
+NewPatientId INT;
+
+BEGIN
+-- 1. Read in Data 
+
+-- Query the Patient Table to see if the email already exists
+
+SELECT COUNT(email)
+INTO ValidEmailChk
+FROM patients.patients
+WHERE email =EEmail;
+
+-- 2. Perform Logcial Operations on the Data
+
+-- Check if email is in a valid format as per constraint
+IF (EEmail NOT LIKE ('%@%_._%')) THEN
+	RAISE EXCEPTION 'Invalid Email format detected: %', EEmail
+		USING hint = 'Validate Email';
+END IF;
+
+IF (ValidEmailChk != 0) THEN
+	RAISE EXCEPTION 'Patient Already Exists: '
+		USING hint = 'Please Log in to your account';
+END IF;
+
+--IF (EEmail NOT LIKE ('%@%_._%')) THEN
+--        RAISE EXCEPTION 'Invalid Email format detected: %', EEmail
+--                USING hint = 'Validate Email';
+--END IF;
+
+-- 3. Perform Data Insertion with Error Handling
+
+-- Try
+BEGIN
+	-- Insert Into Patient Tables
+	NewPatientId := add_patient_details(EFirstName, ELastName, EGender, EEmail, EPassword);
+	RAISE NOTICE 'User Created: %', NewPatientId;
+
+-- Handling Errors Gracefully
+EXCEPTION
+	-- Fallback
+	WHEN others THEN
+	PERFORM error_log(SQLERRM);
+	RAISE NOTICE 'Error Logged. Contact Admin';
+END;
+	
+end; 
+$$;
+
 
