@@ -179,12 +179,12 @@ VALUES
 ON CONFLICT (User_Id) DO NOTHING;
 
 -- Insert GPs
-INSERT INTO gp.gp (First_Name, Last_Name, Role, Employed_At)
+INSERT INTO gp.gp (gp_id, First_Name, Last_Name, Role, Employed_At)
 VALUES
-    ('Sarah', 'Lee', 'Doctor', 'City Health Clinic'),
-    ('John', 'Patel', 'Surgeon', 'Downtown General Hospital'),
-    ('Emily', 'Wong', 'Nurse', 'Community Medical Center')
-ON CONFLICT (Last_Name) DO NOTHING;
+    ('1','Sarah', 'Lee', 'Doctor', 'City Health Clinic'),
+    ('2','John', 'Patel', 'Surgeon', 'Downtown General Hospital'),
+    ('3','Emily', 'Wong', 'Nurse', 'Community Medical Center')
+ON CONFLICT (gp_id) DO NOTHING;
 
 -- Insert Records 
 INSERT INTO records.records (User_Id, Gp_Id, Record_Details, Practice)
