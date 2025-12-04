@@ -184,7 +184,7 @@ VALUES
     ('Sarah', 'Lee', 'Doctor', 'City Health Clinic'),
     ('John', 'Patel', 'Surgeon', 'Downtown General Hospital'),
     ('Emily', 'Wong', 'Nurse', 'Community Medical Center')
-ON CONFLICT (First_Name, Last_Name) DO NOTHING;
+ON CONFLICT (Last_Name) DO NOTHING;
 
 -- Insert Records 
 INSERT INTO records.records (User_Id, Gp_Id, Record_Details, Practice)
