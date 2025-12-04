@@ -181,9 +181,9 @@ ON CONFLICT (User_Id) DO NOTHING;
 -- Insert GPs
 INSERT INTO gp.gp (gp_id, First_Name, Last_Name, Role, Employed_At)
 VALUES
-    ('1','Sarah', 'Lee', 'Doctor', 'City Health Clinic'),
-    ('2','John', 'Patel', 'Surgeon', 'Downtown General Hospital'),
-    ('3','Emily', 'Wong', 'Nurse', 'Community Medical Center')
+    (1,'Sarah', 'Lee', 'Doctor', 'City Health Clinic'),
+    (2,'John', 'Patel', 'Surgeon', 'Downtown General Hospital'),
+    (3,'Emily', 'Wong', 'Nurse', 'Community Medical Center')
 ON CONFLICT (gp_id) DO NOTHING;
 
 -- Insert Records 
